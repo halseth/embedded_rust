@@ -26,7 +26,7 @@ pub unsafe fn __aeabi_unwind_cpp_pr0() -> () {
 // **************************************
 // And now we can write some Rust!
 
-//#[no_mangle]
-fn sum(a : i32, b: i32) -> i32 {
+#[no_mangle]
+pub extern fn sum(a : i32, b: i32) -> i32 {
     a + b
 }
