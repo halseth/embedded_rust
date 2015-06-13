@@ -1,6 +1,7 @@
 CC := rustc
 TARGET := thumbv6m
-RUSTCFLAGS = -C opt-level=2 -Z no-landing-pads --target $(TARGET)-none-eabi -g --emit obj -L libcore-$(TARGET)
+TARGET_TRIPLE := $(TARGET)-none-eabi
+RUSTCFLAGS = -C opt-level=2 -Z no-landing-pads --target $(TARGET_TRIPLE) -g --emit obj -L libcore-$(TARGET)
 
 SRC_DIR = src
 OBJ_DIR = out
@@ -22,7 +23,11 @@ clean:
 	rm -r $(OBJ_DIR)
 	
 ###### Library #######
-library:
-	mkdir -p libcore-$(TARGET)
+LIB_DIR := libcore-$(TARGET)
+
+lib:
+	mkdir -p $(LIB_DIR)
 	rustc -C opt-level=2 -Z no-landing-pads --target $(TARGET)-none-eabi -g ../rust/src/libcore/lib.rs --out-dir libcore-thumbv6m
 
+cleanlib:
+	rm -r $(LIB_DIR)
