@@ -4,6 +4,8 @@
 #![feature(core_slice_ext)]
 #![feature(core_str_ext)]
 #![feature(slice_bytes)]
+#![feature(lang_items, libc, raw)]
+#![feature(core_prelude)]
 #![no_std]
 #![crate_type="staticlib"]
 // **************************************
@@ -14,10 +16,10 @@
 
 extern crate core;
 
-use core::ops::FnMut;
-use core::slice::SliceExt;
+use core::prelude::*;
 use core::slice::bytes::{MutableByteVector, copy_memory};
-use core::str::StrExt;
+use core::mem;
+use core::raw::Slice;
 
 #[lang="stack_exhausted"] extern fn stack_exhausted() {}
 #[lang="eh_personality"] extern fn eh_personality() {}
@@ -32,16 +34,16 @@ pub fn panic_fmt(_fmt: &core::fmt::Arguments, _file_line: &(&'static str, usize)
 // And now we can write some Rust!
 
 #[no_mangle]
-pub extern fn hash(src: *const [u8; 64], dst: *mut [u8; 64]) {
+pub extern fn hash(src: *const u8, src_len: u32, dst: *mut u8, dst_len: u32) {
     if src.is_null() { return; }
     if dst.is_null() { return; }
 
-    // Convert to borrowed pointers.
-    let src: &[u8; 64] = unsafe { &*src };
-    let dst: &mut [u8; 64] = unsafe { &mut *dst };
+    let (src_slice, dst_slice): (&[u8], &mut[u8]) = unsafe {
+        mem::transmute((
+            Slice { data: src, len: src_len as usize },
+            Slice { data: dst, len: dst_len as usize },
+        ))
+    };
 
-    dst[0] = src[0];
-    dst[1] = src[1];
-    dst[2] = src[2];
-    dst[3] = src[3];
+    dst_slice[1] = src_slice[0];
 }
